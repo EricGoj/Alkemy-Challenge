@@ -7,12 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,6 +24,7 @@ import com.practica.entidades.PeliculaResponse;
 import com.practica.repositorio.PeliculaRepositorio;
 
 @RestController
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 public class PeliculaControlador {
 
 	@Autowired
@@ -29,7 +32,7 @@ public class PeliculaControlador {
 	
 
 	// Create
-	@PostMapping(path = "/peliculas", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/movies", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> createPelicula(@RequestBody Pelicula pelicula) {
 		try {
 			servicioPelicula.save(pelicula);
@@ -40,7 +43,7 @@ public class PeliculaControlador {
 	}
 
 	// Read
-	@GetMapping(path = "/peliculas", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/movies", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> listaPeliculas(@RequestParam(required = false, name = "name") String name,
 			@RequestParam(required = false, name = "idGenero") Integer idGenero) {
 		List<Pelicula> peliculas = servicioPelicula.findAll();
@@ -67,7 +70,7 @@ public class PeliculaControlador {
 	}
 
 	// Update
-	@PutMapping(path = "/peliculas/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = "/movies/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> updatePelicula(@RequestBody Pelicula pelicula, @PathVariable Integer id) {
 		Optional<Pelicula> peliData = servicioPelicula.findById(id);
 		if (peliData.isPresent()) {
@@ -84,7 +87,7 @@ public class PeliculaControlador {
 		}
 	}
 
-	@DeleteMapping(path = "/peliculas/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(path = "/movies/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> eliminarPelicula(@PathVariable Integer id) {
 		Optional<Pelicula> persoData = servicioPelicula.findById(id);
 		if (persoData.isPresent()) {
