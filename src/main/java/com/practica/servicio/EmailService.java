@@ -1,4 +1,4 @@
-package com.practica.Service;
+package com.practica.servicio;
 
 import com.sendgrid.Method;
 import com.sendgrid.Request;

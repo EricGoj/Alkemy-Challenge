@@ -1,5 +1,6 @@
 package com.practica.controlador;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.practica.entidades.Genero;
 import com.practica.entidades.Pelicula;
-import com.practica.entidades.PeliculaResponse;
+import com.practica.entidades.response.PeliculaResponse;
+import com.practica.entidades.response.PeliculaResponseFiltro;
+import com.practica.excepciones.IdNotFoundException;
 import com.practica.repositorio.PeliculaRepositorio;
 
 @RestController
@@ -36,7 +39,7 @@ public class PeliculaControlador {
 	public ResponseEntity<?> createPelicula(@RequestBody Pelicula pelicula) {
 		try {
 			servicioPelicula.save(pelicula);
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			return ResponseEntity.status(HttpStatus.CREATED).body("Pelicula agregada con exito");
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
@@ -44,29 +47,35 @@ public class PeliculaControlador {
 
 	// Read
 	@GetMapping(path = "/movies", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> listaPeliculas(@RequestParam(required = false, name = "name") String name,
-			@RequestParam(required = false, name = "idGenero") Integer idGenero) {
+	public ResponseEntity<List<Object>> listaPeliculas(@RequestParam(required = false, name = "name") String name,
+			@RequestParam(required = false, name = "genre") Integer idGenero) {
 		List<Pelicula> peliculas = servicioPelicula.findAll();
-		if (!(idGenero == null)) {
+		List<Object> listaFront = new ArrayList<>();
+		if (name == null && idGenero == null) {
+			for (Pelicula pelis : peliculas) {
+				PeliculaResponse front = new PeliculaResponse(pelis.getTitulo(), pelis.getFechaDeCreacion(),
+						pelis.getCalificacion(), pelis.getNombrePersonaje(), pelis.getImagen());
+				listaFront.add(front);
+			}
+		} else if (!(idGenero == null)) {
 			for (Pelicula pelis : peliculas) {
 				for (Genero generos : pelis.getGeneros()) {
 					if (generos.getId() == idGenero) {
-						PeliculaResponse front = new PeliculaResponse(pelis.getTitulo(), pelis.getFechaDeCreacion(),
-								pelis.getImagen());
-						return new ResponseEntity<>(front, HttpStatus.OK);
+						PeliculaResponseFiltro front = new PeliculaResponseFiltro(pelis.getTitulo(),
+								pelis.getFechaDeCreacion(), pelis.getImagen());
+						listaFront.add(front);
 					}
 				}
 			}
-		}
-		else if (!(name == null)) {
+		} else if (!(name == null)) {
 			peliculas = servicioPelicula.buscarPeliculaPorNombre(name);
 			for (Pelicula pelis : peliculas) {
-				PeliculaResponse front = new PeliculaResponse(pelis.getTitulo(), pelis.getFechaDeCreacion(),
+				PeliculaResponseFiltro front = new PeliculaResponseFiltro(pelis.getTitulo(), pelis.getFechaDeCreacion(),
 						pelis.getImagen());
-				return new ResponseEntity<>(front, HttpStatus.OK);
+				listaFront.add(front);
 			}
 		}
-		return new ResponseEntity<>(peliculas, HttpStatus.OK);
+		return ResponseEntity.status(HttpStatus.OK).body(listaFront);
 	}
 
 	// Update
@@ -81,9 +90,9 @@ public class PeliculaControlador {
 			PeliculaA.setPersonajes(pelicula.getPersonajes());
 			PeliculaA.setGeneros(pelicula.getGeneros());
 			PeliculaA.setImagen(pelicula.getImagen());
-			return new ResponseEntity<>(servicioPelicula.save(PeliculaA), HttpStatus.ACCEPTED);
+			return ResponseEntity.status(HttpStatus.ACCEPTED).body("Cambios realizados con exito");
 		} else {
-			return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+			 throw new IdNotFoundException(id);
 		}
 	}
 
@@ -92,9 +101,9 @@ public class PeliculaControlador {
 		Optional<Pelicula> persoData = servicioPelicula.findById(id);
 		if (persoData.isPresent()) {
 			servicioPelicula.deleteById(id);
-			return new ResponseEntity<>(HttpStatus.ACCEPTED);
+			return ResponseEntity.status(HttpStatus.ACCEPTED).body("Elimnado con exito");
 		} else {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			throw new IdNotFoundException(id);
 		}
 	}
 }

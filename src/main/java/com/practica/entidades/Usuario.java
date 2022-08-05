@@ -34,7 +34,6 @@ public class Usuario {
 		this.token = token;
 	}
 	
-	
 	public Usuario(String usuario, String email, String password) {
 		super();
 		this.usuario = usuario;

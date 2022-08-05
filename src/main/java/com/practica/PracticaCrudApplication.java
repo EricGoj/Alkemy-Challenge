@@ -28,7 +28,8 @@ public class PracticaCrudApplication {
 			http.csrf().disable()
 					.addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
 					.authorizeRequests().antMatchers(HttpMethod.GET, "/characters", "/movies", "/gender").permitAll()
-					.antMatchers(HttpMethod.POST, "/auth/login", "/auth/register", "/characters").permitAll()
+					.antMatchers(HttpMethod.POST, "/auth/login", "/auth/register", "/characters","/movies","/gender").permitAll()
+					.antMatchers(HttpMethod.DELETE,"/characters/{id}","/movies/{id}").permitAll()
 					.anyRequest().authenticated();
 		}
 

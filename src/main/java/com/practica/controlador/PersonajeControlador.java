@@ -1,7 +1,10 @@
 package com.practica.controlador;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,7 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.practica.entidades.Pelicula;
 import com.practica.entidades.Personaje;
-import com.practica.entidades.PersonajeResponse;
+import com.practica.entidades.response.PersonajeResponse;
+import com.practica.entidades.response.PersonajeResponseFiltro;
+import com.practica.excepciones.IdNotFoundException;
 import com.practica.repositorio.PersonajeRepositorio;
 
 @RestController
@@ -31,11 +36,11 @@ public class PersonajeControlador {
 
 	// CRUD
 	// Create
-	@PostMapping(path = "/characters", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/characters", consumes = MediaType.APPLICATION_JSON_VALUE,produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> createPersonaje(@RequestBody Personaje personaje) {
 		try {
 			servicioPersonaje.save(personaje);
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			return ResponseEntity.status(HttpStatus.OK).body("Personaje creado con exito!");
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
@@ -47,30 +52,39 @@ public class PersonajeControlador {
 			@RequestParam(required = false, name = "age") Integer age,
 			@RequestParam(required = false, name = "idMovie") Integer idMovie) {
 		List<Personaje> personajes = servicioPersonaje.findAll();
-		if (!(idMovie == null)) {
+		List<Object> listaFront = new ArrayList<>();
+
+		if (idMovie == null && name == null && age == null) {
+			for (Personaje persona : personajes) {
+				PersonajeResponse per = new PersonajeResponse(persona.getNombre(), persona.getImagen(),
+						persona.getEdad(), persona.getPeso(), persona.getHistoria(), persona.getTituloPelicula());
+				listaFront.add(per);
+
+			}
+		} else if (!(idMovie == null)) {
 			for (Personaje perso : personajes) {
 				for (Pelicula peliculas : perso.getPeliculas()) {
 					if (peliculas.getId() == idMovie) {
-						PersonajeResponse front = new PersonajeResponse(perso.getNombre(), perso.getImagen());
-						return new ResponseEntity<>(front, HttpStatus.OK);
+						PersonajeResponseFiltro front = new PersonajeResponseFiltro(perso.getNombre(),
+								perso.getImagen());
+						listaFront.add(front);
 					}
 				}
 			}
-		}
-		if (!(age == null)) {
+		} else if (!(age == null)) {
 			personajes = servicioPersonaje.buscarPersonajePorEdad(age);
 			for (Personaje a : personajes) {
-				PersonajeResponse per = new PersonajeResponse(a.getNombre(), a.getImagen());
-				return new ResponseEntity<>(per, HttpStatus.OK);
+				PersonajeResponseFiltro front = new PersonajeResponseFiltro(a.getNombre(), a.getImagen());
+				listaFront.add(front);
 			}
 		} else if (!(name == null)) {
 			personajes = servicioPersonaje.buscarPersonajePorNombre(name);
 			for (Personaje a : personajes) {
-				PersonajeResponse per = new PersonajeResponse(a.getNombre(), a.getImagen());
-				return new ResponseEntity<>(per, HttpStatus.OK);
+				PersonajeResponseFiltro front2 = new PersonajeResponseFiltro(a.getNombre(), a.getImagen());
+				listaFront.add(front2);
 			}
 		}
-		return new ResponseEntity<>(servicioPersonaje.findAll(), HttpStatus.OK);
+		return ResponseEntity.status(HttpStatus.OK).body(listaFront);
 	}
 
 	// Update
@@ -84,9 +98,9 @@ public class PersonajeControlador {
 			PersonajeA.setPeso(personaje.getPeso());
 			PersonajeA.setEdad(personaje.getEdad());
 			PersonajeA.setImagen(personaje.getImagen());
-			return new ResponseEntity<>(servicioPersonaje.save(PersonajeA), HttpStatus.ACCEPTED);
+			return ResponseEntity.status(HttpStatus.ACCEPTED).body("Peronsaje Actualizado con exito");
 		} else {
-			return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+			throw new IdNotFoundException(id);
 		}
 	}
 
@@ -96,9 +110,9 @@ public class PersonajeControlador {
 		Optional<Personaje> persoData = servicioPersonaje.findById(id);
 		if (persoData.isPresent()) {
 			servicioPersonaje.deleteById(id);
-			return new ResponseEntity<>(HttpStatus.ACCEPTED);
+			return ResponseEntity.status(HttpStatus.ACCEPTED).body("Personaje borrado con exito!");
 		} else {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			throw new IdNotFoundException(id);
 		}
 	}
 }

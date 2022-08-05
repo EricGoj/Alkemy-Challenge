@@ -1,6 +1,8 @@
 package com.practica.entidades;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -114,6 +116,14 @@ public class Pelicula {
 
 	public void setImagen(byte[] imagen) {
 		this.imagen = imagen;
+	}
+	
+	public List<String> getNombrePersonaje(){
+		List<String> nombres=new ArrayList<>();
+		for(Personaje perso: personajes) {
+			nombres.add(perso.getNombre());
+		}
+		return nombres;
 	}
 
 }

@@ -24,12 +24,12 @@ public class GeneroControlador {
 	public ResponseEntity<?> createGenero(@RequestBody Genero genero) {
 		try {
 			repo.save(genero);
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			return ResponseEntity.status(HttpStatus.CREATED).body("Genero creado exitosamente");
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
-
+	
 	@GetMapping("/gender")
 	public ResponseEntity<?> listaGeneros() {
 		return new ResponseEntity<>(repo.findAll(), HttpStatus.OK);

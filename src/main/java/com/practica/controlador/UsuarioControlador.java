@@ -13,9 +13,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.practica.Service.EmailService;
 import com.practica.entidades.Usuario;
 import com.practica.repositorio.UsuarioDAO;
+import com.practica.servicio.EmailService;
 
 @RestController
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST })
@@ -39,9 +39,8 @@ public class UsuarioControlador {
 		return null;
 	}
 
-	@PostMapping(path = "/auth/register", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/auth/register", consumes = MediaType.APPLICATION_JSON_VALUE,produces=MediaType.APPLICATION_JSON_VALUE)
 	public String register(@RequestBody Usuario usu) throws IOException {
-
 		usuarioservice.save(usu);
 		emailService.sendTextEmail(usu.getEmail(), usu.getUsuario());
 		return "Realizado";

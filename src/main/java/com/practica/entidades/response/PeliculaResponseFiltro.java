@@ -1,6 +1,6 @@
-package com.practica.entidades;
+package com.practica.entidades.response;
 
-public class PeliculaResponse {
+public class PeliculaResponseFiltro {
 	
 	private String nombre;
 
@@ -8,7 +8,7 @@ public class PeliculaResponse {
 	
 	 private byte[] imagen;
 
-	public PeliculaResponse(String nombre, String fechaDeCreacion, byte[] imagen) {
+	public PeliculaResponseFiltro(String nombre, String fechaDeCreacion, byte[] imagen) {
 		super();
 		this.nombre = nombre;
 		this.fechaDeCreacion = fechaDeCreacion;
